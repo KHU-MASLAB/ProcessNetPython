@@ -258,7 +258,11 @@ def RPLT2CSV(SolverFilesPath: str):
     Hr, Min, Sec = Sec2Time(Elapsed)
     print(f"Finished, data export time: {Hr}hr {Min}min {Sec:.2f}sec")
 
-def GenerateBatchSolvingDOE(TopFolderName: str, NumParallelBatches: int = 1, NumCPUCores: int = 16):
+def GenerateBatchSolvingDOE(TopFolderName: str,
+        NumParallelBatches: int = 1,
+        NumCPUCores: int = 16,
+        EndTime: float = 1,
+        NumSteps: int = 100):
     """
     Creates batch-solving DOEs.
     :param TopFolderName: A new directory for batch solving files.
@@ -268,17 +272,14 @@ def GenerateBatchSolvingDOE(TopFolderName: str, NumParallelBatches: int = 1, Num
     :return:
     """
     application.ClearMessage()
+    model_document = application.ActiveModelDocument
+    modelPath = model_document.GetPath(PathType.WorkingFolder)
+    model = model_document.Model
     if NumCPUCores:
         application.Settings.AutoCoreNumber = False
         application.Settings.CoreNumber = NumCPUCores
     else:
         application.Settings.AutoCoreNumber = True
-    
-    model_document = application.ActiveModelDocument
-    modelPath = model_document.GetPath(PathType.WorkingFolder)
-    model = model_document.Model
-    EndTime = 1
-    NumSteps = 100
     
     Counter = 1
     SamplePV = np.logspace(-2, 10, 3, endpoint=True)
@@ -321,7 +322,7 @@ def RunDOE(TopFolderName: str, NumCPUCores: int = 16, EndTime: float = 1, NumSte
     SamplePV = np.logspace(-2, 10, 3, endpoint=True)
     for samplepv in SamplePV:
         ChangePVvalue(model, "PV_SampleK", samplepv)
-        SubFolderName=f"{TopFolderName}_{Counter:04d}"
+        SubFolderName = f"{TopFolderName}_{Counter:04d}"
         model_document.OutputFileName = f"{TopFolderName}\\{SubFolderName}\\{SubFolderName}"
         model_document.Analysis(AnalysisMode.Dynamic)
         Counter += 1
@@ -332,7 +333,8 @@ if __name__ == '__main__':
     # Open SampleModel.rdyn and run code
     
     # For GUI solver,
-    RunDOE("SampleDOE_GUI", 16) # This is equivalent to: GenerateBatchSolvingDOE("SampleDOE_GUI", 1, 16)
+    RunDOE("SampleDOE_GUI",
+           16)  # This is equivalent to: GenerateBatchSolvingDOE("SampleDOE_GUI", 1, 16)
     RPLT2CSV("SampleDOE_GUI")  # Export CSV
     
     # For batch solver,
