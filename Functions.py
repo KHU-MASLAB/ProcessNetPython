@@ -202,6 +202,7 @@ def WriteBatch(SolverFilesFolderName: str, parallelBatches: 1):
     model = model_document.Model
     modelPath = model_document.GetPath(PathType.WorkingFolder)
     RMDlist = glob.glob(f"{modelPath}{SolverFilesFolderName}\\**\\*.rmd", recursive=True)
+    batfilespath=[]
     for i in range(parallelBatches):
         BatchFileName = f"{SolverFilesFolderName}_{i + 1}.bat"
         interval = round(len(RMDlist) / parallelBatches)
@@ -225,6 +226,8 @@ def WriteBatch(SolverFilesFolderName: str, parallelBatches: 1):
             bat.writelines(line + "\n" for line in BATcontent)
         bat.close()
         application.PrintMessage(f"Created batch executable {modelPath}{SolverFilesFolderName}\\{BatchFileName}")
+        batfilespath.append(f"{modelPath}{SolverFilesFolderName}\\{BatchFileName}")
+    return batfilespath
 
 def RPLT2CSV(SolverFilesPath: str):
     """
@@ -272,7 +275,8 @@ def GenerateBatchSolvingDOE(TopFolderName: str,
     :return:
     """
     application.ClearMessage()
-    model_document = application.ActiveModelDocument
+    # model_document = application.ActiveModelDocument
+    model_document = application.OpenModelDocument(f"{os.getcwd()}\\SampleModel.rdyn")
     modelPath = model_document.GetPath(PathType.WorkingFolder)
     model = model_document.Model
     if NumCPUCores:
@@ -288,7 +292,8 @@ def GenerateBatchSolvingDOE(TopFolderName: str,
         SubFolderName = f"{TopFolderName}_{Counter:04d}"
         ExportSolverFiles(TopFolderName, SubFolderName, EndTime=EndTime, NumSteps=NumSteps)
         Counter += 1
-    WriteBatch(TopFolderName, NumParallelBatches)
+    batfilespath=WriteBatch(TopFolderName, NumParallelBatches)
+    subprocess.run(batfilespath)
 
 def RunDOE(TopFolderName: str, NumCPUCores: int = 16, EndTime: float = 1, NumSteps: int = 100):
     """
@@ -301,7 +306,8 @@ def RunDOE(TopFolderName: str, NumCPUCores: int = 16, EndTime: float = 1, NumSte
     ############################# INITIAL SETTING #############################
     ############################# INITIAL SETTING #############################
     application.ClearMessage()
-    model_document = application.ActiveModelDocument
+    # model_document = application.ActiveModelDocument
+    model_document = application.OpenModelDocument(f"{os.getcwd()}\\SampleModel.rdyn")
     modelPath = model_document.GetPath(PathType.WorkingFolder)
     model = model_document.Model
     application.Settings.CreateOutputFolder = False
@@ -333,13 +339,11 @@ if __name__ == '__main__':
     # Open SampleModel.rdyn and run code
     
     # For GUI solver,
-    RunDOE("SampleDOE_GUI",
-           16)  # This is equivalent to: GenerateBatchSolvingDOE("SampleDOE_GUI", 1, 16)
+    RunDOE("SampleDOE_GUI", 16)  # This is equivalent to: GenerateBatchSolvingDOE("SampleDOE_GUI", 1, 16)
     RPLT2CSV("SampleDOE_GUI")  # Export CSV
     
     # For batch solver,
     GenerateBatchSolvingDOE("SampleDOE_Batch", 1, 16)
-    # Run *.bat files and then run RPLT2CSV("SampleDOE_Batch")
     RPLT2CSV("SampleDOE_Batch")  # Export CSV
     #
     

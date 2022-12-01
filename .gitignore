@@ -1,3 +1,7 @@
 
 *.xml
 *.iml
+*.rbak
+*.msg
+*.msg
+*.log
