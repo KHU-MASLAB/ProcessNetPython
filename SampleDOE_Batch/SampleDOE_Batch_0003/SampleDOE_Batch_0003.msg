@@ -47,7 +47,7 @@ Integrator Information
 
 _________________________________________________________________________________________________
 Information of starting time
-    Starting Time/Date     = 16:54:39 / 2022.12.1
+    Starting Time/Date     = 17:43:1 / 2022.12.1
 
 _________________________________________________________________________________________________
 Analysis processing...
@@ -59,9 +59,9 @@ Analysis processing...
 
 _________________________________________________________________________________________________
 Analysis Time Information
-    Starting Time/Date     = 16:54:39 / 2022.12.1
-    Ending Time/Date       = 16:54:40 / 2022.12.1
-    CPU Time = 0.6 Second (0 hr. 0 min 0.6 sec.)
+    Starting Time/Date     = 17:43:1 / 2022.12.1
+    Ending Time/Date       = 17:43:2 / 2022.12.1
+    CPU Time = 0.13 Second (0 hr. 0 min 0.13 sec.)
 
 _________________________________________________________________________________________________
 Analysis is accomplished successfully

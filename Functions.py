@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 import joblib
 rdSolverDir = "\"C:\Program Files\FunctionBay, Inc\RecurDyn V9R5\Bin\Solver\RDSolverRun.exe\""
 
-
 ####################################################################################################################################################
 ####################################################################################################################################################
 ####################################################################################################################################################
@@ -203,7 +202,7 @@ def WriteBatch(SolverFilesFolderName: str, parallelBatches: 1):
     model = model_document.Model
     modelPath = model_document.GetPath(PathType.WorkingFolder)
     RMDlist = glob.glob(f"{modelPath}{SolverFilesFolderName}\\**\\*.rmd", recursive=True)
-    batfilespath=[]
+    batfilespath = []
     for i in range(parallelBatches):
         BatchFileName = f"{SolverFilesFolderName}_{i + 1}.bat"
         interval = round(len(RMDlist) / parallelBatches)
@@ -285,7 +284,7 @@ def RunDOE_Batch(TopFolderName: str,
         application.Settings.CoreNumber = NumCPUCores
     else:
         application.Settings.AutoCoreNumber = True
-    
+    AnalysisStartTime = time.time()
     Counter = 1
     SamplePV = np.logspace(-2, 10, 3, endpoint=True)
     for samplepv in SamplePV:
@@ -293,12 +292,17 @@ def RunDOE_Batch(TopFolderName: str,
         SubFolderName = f"{TopFolderName}_{Counter:04d}"
         ExportSolverFiles(TopFolderName, SubFolderName, EndTime=EndTime, NumSteps=NumSteps)
         Counter += 1
-    batfilespath=WriteBatch(TopFolderName, NumParallelBatches)
-    run = joblib.Parallel(n_jobs=len(batfilespath))(joblib.delayed(RunSubprocess)(bat) for bat in batfilespath)
+    
+    batfilespath = WriteBatch(TopFolderName, NumParallelBatches)
+    joblib.Parallel(n_jobs=len(batfilespath))(
+            joblib.delayed(RunSubprocess)(bat) for bat in batfilespath)
+    AnalysisEndTime = time.time()
+    h, m, s = Sec2Time(AnalysisEndTime - AnalysisStartTime)
+    print(f"Analysis finished within {h}hr {m}min {s}sec.")
 
 def RunSubprocess(single_batfilepath):
-    subprocess.run(single_batfilepath)
-    
+    subprocess.run(single_batfilepath, creationflags=subprocess.CREATE_NEW_CONSOLE)
+
 
 def RunDOE_GUI(TopFolderName: str, NumCPUCores: int = 16, EndTime: float = 1, NumSteps: int = 100):
     """
@@ -348,7 +352,7 @@ if __name__ == '__main__':
     # RPLT2CSV("SampleDOE_GUI")  # Export CSV
     
     # For batch solver,
-    RunDOE_Batch("SampleDOE_Batch", 1, 16)
+    RunDOE_Batch("SampleDOE_Batch", 2, 16)
     RPLT2CSV("SampleDOE_Batch")  # Export CSV
     #
     
