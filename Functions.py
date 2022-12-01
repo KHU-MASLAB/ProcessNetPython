@@ -348,11 +348,11 @@ if __name__ == '__main__':
     # Open SampleModel.rdyn and run code
     
     # For GUI solver,
-    # RunDOE_GUI("SampleDOE_GUI", 16)  # This is equivalent to: GenerateBatchSolvingDOE("SampleDOE_GUI", 1, 16)
-    # RPLT2CSV("SampleDOE_GUI")  # Export CSV
+    RunDOE_GUI("SampleDOE_GUI", NumCPUCores=16, EndTime=1, NumSteps=100)  # This is equivalent to: GenerateBatchSolvingDOE("SampleDOE_GUI", 1, 16)
+    RPLT2CSV("SampleDOE_GUI")  # Export CSV
     
     # For batch solver,
-    RunDOE_Batch("SampleDOE_Batch", 2, 16)
+    RunDOE_Batch("SampleDOE_Batch",NumCPUCores=4, NumParallelBatches=3, EndTime=1, NumSteps=100) # 3 parallel simulation runs, each using 4 CPU threads
     RPLT2CSV("SampleDOE_Batch")  # Export CSV
     #
     
