@@ -14,6 +14,8 @@ import re
 import pandas as pd
 import shutil
 import matplotlib.pyplot as plt
+import joblib
+rdSolverDir = "\"C:\Program Files\FunctionBay, Inc\RecurDyn V9R5\Bin\Solver\RDSolverRun.exe\""
 
 
 ####################################################################################################################################################
@@ -101,7 +103,6 @@ def dispose():
 ####################################################################################################################################################
 ####################################################################################################################################################
 ####################################################################################################################################################
-rdSolverDir = "\"C:\Program Files\FunctionBay, Inc\RecurDyn V9R5\Bin\Solver\RDSolverRun.exe\""
 
 def CreateDir(DirectoryPath: str):
     """
@@ -261,7 +262,7 @@ def RPLT2CSV(SolverFilesPath: str):
     Hr, Min, Sec = Sec2Time(Elapsed)
     print(f"Finished, data export time: {Hr}hr {Min}min {Sec:.2f}sec")
 
-def GenerateBatchSolvingDOE(TopFolderName: str,
+def RunDOE_Batch(TopFolderName: str,
         NumParallelBatches: int = 1,
         NumCPUCores: int = 16,
         EndTime: float = 1,
@@ -293,9 +294,13 @@ def GenerateBatchSolvingDOE(TopFolderName: str,
         ExportSolverFiles(TopFolderName, SubFolderName, EndTime=EndTime, NumSteps=NumSteps)
         Counter += 1
     batfilespath=WriteBatch(TopFolderName, NumParallelBatches)
-    subprocess.run(batfilespath)
+    run = joblib.Parallel(n_jobs=len(batfilespath))(joblib.delayed(RunSubprocess)(bat) for bat in batfilespath)
 
-def RunDOE(TopFolderName: str, NumCPUCores: int = 16, EndTime: float = 1, NumSteps: int = 100):
+def RunSubprocess(single_batfilepath):
+    subprocess.run(single_batfilepath)
+    
+
+def RunDOE_GUI(TopFolderName: str, NumCPUCores: int = 16, EndTime: float = 1, NumSteps: int = 100):
     """
     Run automated simulations in GUI interface solver.
     :param TopFolderName: A new directory for solved files.
@@ -339,11 +344,11 @@ if __name__ == '__main__':
     # Open SampleModel.rdyn and run code
     
     # For GUI solver,
-    RunDOE("SampleDOE_GUI", 16)  # This is equivalent to: GenerateBatchSolvingDOE("SampleDOE_GUI", 1, 16)
-    RPLT2CSV("SampleDOE_GUI")  # Export CSV
+    # RunDOE_GUI("SampleDOE_GUI", 16)  # This is equivalent to: GenerateBatchSolvingDOE("SampleDOE_GUI", 1, 16)
+    # RPLT2CSV("SampleDOE_GUI")  # Export CSV
     
     # For batch solver,
-    GenerateBatchSolvingDOE("SampleDOE_Batch", 1, 16)
+    RunDOE_Batch("SampleDOE_Batch", 1, 16)
     RPLT2CSV("SampleDOE_Batch")  # Export CSV
     #
     
